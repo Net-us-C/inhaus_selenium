@@ -1,4 +1,10 @@
-package inhaus.inhaus.data;
+package inhaus.inhaus.service;
+
+import java.util.Arrays;
+import java.util.List; //--------
+import java.util.ArrayList; //--------------
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -47,8 +53,8 @@ public class DataService {
         Thread.sleep(2000); // 페이지 로딩 대기 시간 주기.
 
         // 아이디/비밀번호 입력
-        driver.findElement(By.name("user_id")).sendKeys("id");
-        driver.findElement(By.name("user_password")).sendKeys("pw");
+        driver.findElement(By.name("user_id")).sendKeys("12201702");
+        driver.findElement(By.name("user_password")).sendKeys("kimmj010611!");
 
         // 로그인 버튼 클릭
         driver.findElement(By.cssSelector("input[type='button'][onclick='doLogin()']")).click();
@@ -62,7 +68,8 @@ public class DataService {
 
         newTap(driver);
 
-        for(int i = 1; i <= 12; i++){
+        LocalDate now = LocalDate.now();
+        for(int i = now.getMonthValue(); i <= 5; i++) {
             String Month = i + "월";
             driver.get("https://ins2.inha.ac.kr/ITIS/ADM/SS/SS_04002/UseSearch_Pop.aspx?EquipCode=");
             driver.findElement(By.name("ddlYear")).sendKeys("2023");
@@ -71,6 +78,7 @@ public class DataService {
             String originalHandle = driver.getWindowHandle();
             driver.findElement(By.name("ibtnReservationPrint")).click();
             driver.switchTo().window(originalHandle);
+
 
             // 요소를 식별하기 위한 XPath 또는 CSS 선택자를 사용하여 해당 요소를 찾습니다.
             WebElement element = driver.findElement(By.xpath("//script[contains(text(),'ReservationView_xml.aspx?Value=')]"));
@@ -90,12 +98,37 @@ public class DataService {
 
             driver.get("https://ins2.inha.ac.kr/ITIS/ADM/SS/SS_04002/ReservationView_xml.aspx?Value=" + value);
             Thread.sleep(5000);
-            System.out.println(driver.getPageSource());
+            //System.out.println(driver.getPageSource());
+
+            //-------------------------------------------------------
+            List<String> day = Arrays.asList("sun", "mon", "tue", "wed", "thu", "fri", "sat", "sun", "mon", "tue", "wed", "thu", "fri", "sat");
+            ArrayList<String> arrayList = new ArrayList<>();
+            for (int j = 0; j < 32; j++) {
+                arrayList.add("0");
+            }
+
+            String text;
+            int count = 1;
+
+            for (int j = 0; j < 7; j++) {
+                List<WebElement> el = driver.findElements(By.tagName(day.get(LocalDate.of(2023, i, 1).getDayOfWeek().getValue() + j)));
+                for (int k = 0; k < el.size(); k++) {
+                    text = el.get(k).getText();
+                    if (text.length() != 0) {
+                        if (arrayList.get(Integer.parseInt(text.substring(0, 2))).equals("0")) {
+                            count++;
+                            arrayList.set(Integer.parseInt(text.substring(0, 2)), text);
+                        }
+                    }
+                }
+            }
+            for (int j = 0; j < arrayList.size(); j++) {
+                System.out.println(arrayList.get(j));
+            }
+            count = 1;
+
+            // 브라우저 종료
+            driver.quit();
         }
-
-
-
-        // 브라우저 종료
-//        driver.quit();
     }
 }
