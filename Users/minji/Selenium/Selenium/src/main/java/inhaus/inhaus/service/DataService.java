@@ -1,11 +1,9 @@
 package inhaus.inhaus.service;
 
-import java.util.Arrays;
-import java.util.List; //--------
-import java.util.ArrayList; //--------------
-import java.time.DayOfWeek;
+import java.util.*;
 import java.time.LocalDate;
 
+import inhaus.inhaus.data.Data;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.openqa.selenium.By;
@@ -16,11 +14,28 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 
 import java.io.IOException;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+class Events {
+    public int month;
+    public int day;
+    public String start_time;
+    public String end_time;
+    public String contents;
+
+    public void setEvents(int month, int day, String start_time, String end_time, String contents){
+        this.day = day;
+        this.contents = contents;
+        this.end_time = end_time;
+        this.start_time = start_time;
+        this.month = month;
+    }
+    public void printall(){
+        System.out.println("(" + month + ", " + day + ", " + contents + ", " + start_time + ", " + end_time + ")");
+    }
+}
 public class DataService {
     public static void newTap(WebDriver driver){
         // 현재 탭의 핸들(식별자) 저장
@@ -68,8 +83,10 @@ public class DataService {
 
         newTap(driver);
 
+
         LocalDate now = LocalDate.now();
-        for(int i = now.getMonthValue(); i <= 5; i++) {
+        ArrayList<Events> events = new ArrayList<Events>();
+        for(int i = now.getMonthValue(); i <= 6; i++) {
             String Month = i + "월";
             driver.get("https://ins2.inha.ac.kr/ITIS/ADM/SS/SS_04002/UseSearch_Pop.aspx?EquipCode=");
             driver.findElement(By.name("ddlYear")).sendKeys("2023");
@@ -122,13 +139,31 @@ public class DataService {
                     }
                 }
             }
-            for (int j = 0; j < arrayList.size(); j++) {
-                System.out.println(arrayList.get(j));
+
+            int index = -1;
+            for (int j = 1; j < arrayList.size(); j++) {
+                if (arrayList.get(j).length() < 5){
+                    continue;
+                }
+                String [] contents = arrayList.get(j).split("/");
+                for(int k = 0; k < contents.length; k++ ){
+                    if(contents[k].contains("~")){
+                        index = contents[k].indexOf("~");
+                        Events event = new Events();
+                        event.setEvents(i, Integer.parseInt(arrayList.get(j).substring(0, 2)),contents[k].substring(index-5, index),contents[k].substring(index+1, index+6),contents[k].substring(0, index-5));
+                        events.add(event);
+                    }
+                }
+
+                //System.out.println(arrayList.get(j));
             }
             count = 1;
 
             // 브라우저 종료
-            driver.quit();
         }
+        for(int j = 0; j < events.size(); j++) {
+            events.get(j).printall();
+        }
+        driver.quit();
     }
 }

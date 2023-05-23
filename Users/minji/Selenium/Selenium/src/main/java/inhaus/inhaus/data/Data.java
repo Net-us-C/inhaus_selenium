@@ -8,10 +8,12 @@ import lombok.ToString;
 @ToString
 @Builder
 public class Data {
-    private String place;
-    private String date_month;
-    private String date_day;
-    private String user;
-    private String time_start;
-    private String time_end;
+    String place = "운동장(축구장)";
+    int month = 0;
+    int day = 0;
+    String content = "";
+    String start_time = "";
+    String end_time = "";
+
+
 }
